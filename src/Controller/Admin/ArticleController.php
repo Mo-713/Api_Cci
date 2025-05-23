@@ -2,18 +2,19 @@
 
 namespace App\Controller\Admin;
 
-use App\Dto\Article\CreateArticleDto;
-use App\Dto\Article\UpdateArticleDto;
 use App\Entity\Article;
 use App\Mapper\ArticleMapper;
+use App\Dto\Filter\ArticleFilterDto;
+use App\Dto\Article\CreateArticleDto;
+use App\Dto\Article\UpdateArticleDto;
 use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Validator\Constraints\Json;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api/admin/articles', name: 'api_admin_articles_')]
 class ArticleController extends AbstractController
@@ -26,10 +27,13 @@ class ArticleController extends AbstractController
     }
 
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(): JsonResponse
+    public function index(
+        #[MapQueryString]
+        ArticleFilterDto $articleFilterDto
+    ): JsonResponse
     {
         return $this->json(
-            $this->articleRepository->findAll(),
+            $this->articleRepository->findPaginate($articleFilterDto),
             Response::HTTP_OK,
             context: ['groups' => ['common:index', 'articles:index', 'articles:show']]
         );
