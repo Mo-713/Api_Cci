@@ -1,0 +1,10 @@
+include:
+  - UserFixtures.yaml
+
+App\Entity\Article:
+  article_unique_name:
+    title: "Article test"
+    content: "<sentence(10)>"
+    short_content: "<sentence(5)>"
+    enabled: <boolean()>
+    user: "@user_unique_username"
