@@ -12,7 +12,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Validator\Constraints\Image;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapUploadedFile;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -23,15 +26,13 @@ class ArticleController extends AbstractController
         private ArticleRepository $articleRepository,
         private EntityManagerInterface $em,
         private readonly ArticleMapper $articleMapper,
-    ) {
-    }
+    ) {}
 
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(
         #[MapQueryString]
         ArticleFilterDto $articleFilterDto
-    ): JsonResponse
-    {
+    ): JsonResponse {
         return $this->json(
             $this->articleRepository->findPaginate($articleFilterDto),
             Response::HTTP_OK,
@@ -85,7 +86,36 @@ class ArticleController extends AbstractController
             Response::HTTP_NO_CONTENT,
         );
     }
+
+    #[Route('/{id}/upload', name: 'upload', methods: ['POST'])]
+    public function upload(
+        Article $article,
+        #[MapUploadedFile(
+            new Image(
+                maxSize: '8M',
+                maxSizeMessage: 'The image is too large. Maximum size is {{ limit }} {{ suffix }}.',
+                mimeTypes: [
+                    'image/jpeg',
+                    'image/png',
+                    'image/gif',
+                    'image/webp',
+                    'image/svg+xml',
+                    'image/jpg',
+                    'image/avif'
+                ],
+                mimeTypesMessage: 'The file must be an image(jpeg, png, gif, webp, svg, jpg, avif).',
+                detectCorrupted: true,
+            )
+        )]
+        UploadedFile $image
+    ): JsonResponse {
+        $article->setImageFile($image);
+
+        $this->em->flush();
+
+        return $this->json(
+            data: null,
+            status: Response::HTTP_NO_CONTENT
+        );
+    }
 }
-
-
-
