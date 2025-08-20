@@ -279,4 +279,3 @@ class ArticleControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 }
-}
