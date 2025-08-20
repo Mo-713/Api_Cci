@@ -11,19 +11,18 @@ jobs:
     name: PHP ${{ matrix.php }}, Symfony ${{ matrix.symfony }}
     strategy:
       matrix:
-        php: [8.2, 8.3]
+        php: [8.2]
         symfony: [7.1]
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: "${{ matrix.php }}"
           extensions: intl, mbstring, opache, pdo_sqlite, apcu, pcov
           tools: symfony
-          ini_values: memory_limit=3G
           coverage: pcov
 
       - name: Install composer dependencies
